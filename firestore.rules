@@ -1,0 +1,22 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /sensor_readings/{readingId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null
+                    && request.resource.data.keys().hasAll([
+                      'treeId', 'resistance', 'temperature', 'humidity',
+                      'soilMoisture', 'healthIndex', 'status', 'timestamp'
+                    ])
+                    && request.resource.data.treeId is string
+                    && request.resource.data.resistance is number
+                    && request.resource.data.temperature is number
+                    && request.resource.data.humidity is number
+                    && request.resource.data.soilMoisture is number
+                    && request.resource.data.healthIndex is number
+                    && request.resource.data.status is string
+                    && request.resource.data.timestamp == request.time;
+      allow update, delete: if false;
+    }
+  }
+}
